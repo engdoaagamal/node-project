@@ -4,14 +4,16 @@ const Student = require("../models/Student");
 const bycrbt=require("bcrypt");
 const Create_Student=async(req,res)=>{
 try {
-  
+  return res.status(200).json({
+    msg:"welcome to student  create student func"
+   })
     const {name,email,password ,universityId, department}=req.body;
     if(!name||!email ||!password ||!universityId||! department)res.status(404).json({
         msg:"please enter all data ",
 
     })
-    const newstudent=await Student.findone({universityId});
-    if(newstudent)res.status(404).json({
+    const oldstudent=await Student.findone({universityId});
+    if(oldstudent)res.status(404).json({
         msg:"please enter all data ",
 
     })

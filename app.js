@@ -14,8 +14,11 @@ try {
  
 }
 connectDB()
-app.get("/api",()=>{
+app.get("/api",(req,res)=>{
     console.log("welcome to test");
+   res.status(200).json({
+    msg:"welcome"
+   })
 })
 app.listen(port,()=>{
     console.log("server run")
