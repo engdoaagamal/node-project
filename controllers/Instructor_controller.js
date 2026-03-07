@@ -13,7 +13,7 @@ const login_instructor = async (req, res) => {
         })
         const match = await bcrypt.compare(password, logininstructor.password)
         if (!match)
-            return res.status(401).json({ message: "invalid password" })
+            return res.status(400).json({ message: "invalid password" })
         const tocken = jwt.sign({
             id: logininstructor._id,
             email: logininstructor.email,

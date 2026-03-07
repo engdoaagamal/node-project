@@ -34,7 +34,7 @@ const Create_Student = async (req, res) => {
 
     const { password: pwd, ...studentData } = newstudent._doc;
 
-    res.status(200).json({
+    res.status(201).json({
       msg: "creating student success",
       data: studentData
     });
@@ -115,7 +115,7 @@ const gat_All_Student = async (req, res) => {
 
         const Allstudent = await student.find();
         // return console.log(Allstudent)
-        if (Allstudent.length === 0) return res.status(404).json({
+        if (Allstudent.length === 0) return res.status(400).json({
             msg: "no  data exist",
 
         })
