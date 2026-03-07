@@ -20,6 +20,13 @@ app.get("/api",(req,res)=>{
     msg:"welcome"
    })
 })
+app.use(express.json());
+const studentrouters=require("./routers/student_routera");
+app.use("/api",studentrouters);
+
+const instructorRouters = require("./routers/instructor_routers"); 
+app.use("/api", instructorRouters);
+
 app.listen(port,()=>{
     console.log("server run")
 }) 
