@@ -2,6 +2,7 @@ const instructor = require("../models/instructor_modules")// to access the model
 const jwt = require("jsonwebtoken")// create token 
 const bcrypt = require("bcrypt")// encrebt pwd 
 const joi = require("joi");//for validation 
+const { createInstructorSchema } = require("../validation/instructorsValidation");
 
 const login_instructor = async (req, res) => {
 
@@ -37,14 +38,14 @@ const login_instructor = async (req, res) => {
 }
 const register_instructor = async (req, res) => {
     try {
-        const schema = joi.object({
-            name: joi.string().trim().required().min(10).max(50),
-            email: joi.string().trim().email().required(),
-            specialization: joi.string().trim().required(),
-            password:joi.string().trim().required().min(6).max(8),
+        // const schema = joi.object({
+        //     name: joi.string().trim().required().min(10).max(50),
+        //     email: joi.string().trim().email().required(),
+        //     specialization: joi.string().trim().required(),
+        //     password:joi.string().trim().required().min(6).max(8),
 
-        })
-        const { error, value } = schema.validate(req.body);
+        // })
+       const { error, value } = createInstructorSchema.validate(req.body);
         if (error) return res.status(400).json({
             message: error.details[0].message
         })

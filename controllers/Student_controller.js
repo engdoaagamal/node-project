@@ -5,47 +5,73 @@ const student = require("../models/Student_module");
 const bcrypt = require("bcrypt");
 const joi = require("joi");
 
+const { verifyTocken}=require("../middelware/verifytocken")
+const { createStudentSchema, updateStudentSchema } = require("../validation/studentValidation");
+
 const async_handler = require("express-async-handler");
 // register student 
 
-const Create_Student = async (req, res) => {
-  try {
-    const schema = joi.object({
-      name: joi.string().trim().required().max(50).min(10),
-      email: joi.string().trim().email().required(),
-      universityId: joi.number().required(),
-      password: joi.string().trim().min(6).max(8).required(),
-      department: joi.string().trim().required(),
-    });
+// const Create_Student = async (req, res) => {
+//     try {
+      
 
-    const { error, value } = schema.validate(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
+//         const { error, value } = createStudentSchema.validate(req.body);
+//         if (error) return res.status(400).json({ message: error.details[0].message });
 
-    const { name, email, password, universityId, department } = value;
+//         const { name, email, password, universityId, department } = value;
 
-    if (await student.findOne({ email }))
-      return res.status(400).json({ msg: "Email already exists" });
+//         if (await student.findOne({ email }))
+//             return res.status(400).json({ msg: "Email already exists" });
 
-    const newpwd = await bcrypt.hash(password, 10);
+//         const newpwd = await bcrypt.hash(password, 10);
 
-    const newstudent = await student.create({
-      name, email, password: newpwd, universityId, department
-    });
+//         const newstudent = await student.create({
+//             name, email, password: newpwd, universityId, department
+//         });
 
-    const { password: pwd, ...studentData } = newstudent._doc;
+//         const { password: pwd, ...studentData } = newstudent._doc;
 
-    res.status(201).json({
-      msg: "creating student success",
-      data: studentData
-    });
+//         res.status(201).json({
+//             msg: "creating student success",
+//             data: studentData
+//         });
 
-  } catch (error) {
-    res.status(500).json({
-      msg: "error in the creation student",
-      error: error.message
-    });
-  }
+//     } catch (error) {
+//         res.status(500).json({
+//             msg: "error in the creation student",
+//             error: error.message
+//         });
+//     }
+// }
+
+
+
+const Create_Student =async_handler(
+    async (req, res) => {
+        const { error, value } = createStudentSchema.validate(req.body);
+        if (error) return res.status(400).json({ message: error.details[0].message });
+
+        const { name, email, password, universityId, department } = value;
+
+        if (await student.findOne({ email }))
+            return res.status(400).json({ msg: "Email already exists" });
+
+        const newpwd = await bcrypt.hash(password, 10);
+
+        const newstudent = await student.create({
+            name, email, password: newpwd, universityId, department
+        });
+
+        const { password: pwd, ...studentData } = newstudent._doc;
+
+        res.status(201).json({
+            msg: "creating student success",
+            data: studentData
+        });
+
+    
 }
+) 
 // const Create_Student = async (req, res) => {
 // try{
 //       const Schema = joi.object({
@@ -74,7 +100,7 @@ const Create_Student = async (req, res) => {
 //     })
 
 // }
-  
+
 //     // try {
 //     // //   return res.status(200).json({
 //     // //     msg:"welcome to student  create student func"
@@ -166,7 +192,7 @@ const gat_one_Student = async (req, res) => {
 
 
 // login and create token 
-const login_student = async (req, res) => {
+const login_student =  async (req, res) => {
 
     try {
         const { email, password } = req.body;
@@ -205,17 +231,56 @@ const login_student = async (req, res) => {
 
 }
 
-const update_student = async (req, res) => {
+const update_student = async_handler(
+     async (req, res) => {
+   if(req.user.id!==req.params.id){
+    return res.status(403).json({ message:"You are not allowed to access this account"})
+   }
+        const { error } = updateStudentSchema.validate(req.body);
+        if (error)
+            return res.status(400).json({
+                message: error.details[0].message
+            })
+        const updatesdstudent = await student.findByIdAndUpdate(req.params.id, {
+            $set: {
+                name: req.body.name,
+                email: req.body.email,
+                department: req.body.department
+            }
+        }, { new: true });
 
-}
-const delete_instructor = async (req, res) => {
+        if (!updatesdstudent)
+            return res.status(404).json({ msg: "student not found" })
 
+        res.status(200).json({
+            msg: "updating student success",
+            data: updatesdstudent
+        });
+
+    
 }
+)
+
+const delete_student =async_handler(
+    async (req, res) => {
+    
+        const  deletestudent=  await student.findByIdAndDelete(req.params.id);
+        if (!deletestudent) 
+      return res.status(404).json({ msg: "student not found" })
+ 
+    
+       return res.status(200).json({
+            msg: "deleting student success",
+            data: deletestudent
+        });}
+) 
+    
+
 module.exports = {
     Create_Student,
     gat_All_Student,
     gat_one_Student,
     login_student,
     update_student,
-    delete_instructor,
+    delete_student,
 }
