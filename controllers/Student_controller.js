@@ -210,15 +210,16 @@ const login_student =  async (req, res) => {
             id: loginstudent._id,
             email: loginstudent.email,
             universityId: loginstudent.universityId,
-            name: loginstudent.name
+            name: loginstudent.name,
+            role:"student"
         },
             process.env.JWT_SECRET,
             { expiresIn: "5h" })
-        //return console.log("the token created :",token)
+        //return console.log("the token created :",token)//jwt.decode(token)
         res.status(200).json({
             msg: "students login successfully",
             data: loginstudent,
-            token: jwt.decode(token)
+            token
         })
 
 

@@ -2,6 +2,7 @@ const instructor = require("../models/instructor_modules")// to access the model
 const jwt = require("jsonwebtoken")// create token 
 const bcrypt = require("bcrypt")// encrebt pwd 
 const joi = require("joi");//for validation 
+const async_handler = require("express-async-handler");// for error handler
 const { createInstructorSchema } = require("../validation/instructorsValidation");
 
 const login_instructor = async (req, res) => {
@@ -19,20 +20,21 @@ const login_instructor = async (req, res) => {
             id: logininstructor._id,
             email: logininstructor.email,
             specialization: logininstructor.specialization,
-            name: logininstructor.name
+            name: logininstructor.name,
+            role: "admin"
         },
             process.env.JWT_SECRET,
             { expiresIn: "5h" }
         )
         res.status(200).json({
-                    msg: "instructor login successfully",
-                    data: logininstructor,
-                    token: jwt.decode(tocken)
-                })
+            msg: "instructor login successfully",
+            data: logininstructor,
+            tocken
+        })
     } catch (error) {
-    res.status(500).json({
+        res.status(500).json({
             msg: "error in the login instructor ",
-            error:error.message
+            error: error.message
         })
     }
 }
@@ -45,7 +47,7 @@ const register_instructor = async (req, res) => {
         //     password:joi.string().trim().required().min(6).max(8),
 
         // })
-       const { error, value } = createInstructorSchema.validate(req.body);
+        const { error, value } = createInstructorSchema.validate(req.body);
         if (error) return res.status(400).json({
             message: error.details[0].message
         })
@@ -64,7 +66,7 @@ const register_instructor = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             msg: "error in the creation instructor ",
-            error:error.message
+            error: error.message
         })
     }
 
@@ -105,12 +107,49 @@ const get_all_instructor = async (req, res) => {
     }
 
 }
-const update_instructor = async (req, res) => {
+const update_instructor = async_handler(
+    async (req, res) => {
+        
+             const { error } = updateStudentSchema.validate(req.body);
+             if (error)
+                 return res.status(400).json({
+                     message: error.details[0].message
+                 })
+             const updatesdinstructor = await instructor.findByIdAndUpdate(req.params.id, {
+                 $set: {
+                     name: req.body.name,
+                     email: req.body.email,
+                     specialization: req.body.specialization
+                 }
+             }, { new: true });
+     
+             if (!updatesdinstructor)
+                 return res.status(404).json({ msg: "instructor not found" })
+     
+             res.status(200).json({
+                 msg: "updating instructor success",
+                 data: updatesdinstructor
+             });
+     
+         
+     }
+     )
+const delete_instructor = async_handler(
+    async (req, res) => {
+        const deleted_instructor = await instructor.findByIdAndDelete(req.params.id)
+        if (!deleted_instructor)
+            return res.status(404).json({ msg: "instructor not found" })
 
-}
-const delete_instructor = async (req, res) => {
+        return res.status(200).json({
+            msg: "deleting instructor success",
+            data: deleted_instructor
+        });
+    }
 
-}
+)
+/*
+
+*/
 module.exports = {
     login_instructor,
     register_instructor,
