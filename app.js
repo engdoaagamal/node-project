@@ -28,6 +28,11 @@ app.use("/api",studentrouters);
 const instructorRouters = require("./routers/instructor_routers"); 
 app.use("/api", instructorRouters);
 
+const projectRouters = require("./routers/Project_router"); 
+app.use("/api", projectRouters);
+
+const taskRouters = require("./routers/Task_router"); 
+app.use("/api", taskRouters);
 app.listen(port,()=>{
     console.log("server run")
 }) 

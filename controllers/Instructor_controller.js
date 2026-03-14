@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken")// create token
 const bcrypt = require("bcrypt")// encrebt pwd 
 const joi = require("joi");//for validation 
 const async_handler = require("express-async-handler");// for error handler
-const { createInstructorSchema } = require("../validation/instructorsValidation");
+const { createInstructorSchema ,updateInstructorSchema} = require("../validation/instructorsValidation");
 
 const login_instructor = async (req, res) => {
 
@@ -26,6 +26,7 @@ const login_instructor = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "5h" }
         )
+        //jwt.decode(tocken)
         res.status(200).json({
             msg: "instructor login successfully",
             data: logininstructor,
@@ -40,13 +41,7 @@ const login_instructor = async (req, res) => {
 }
 const register_instructor = async (req, res) => {
     try {
-        // const schema = joi.object({
-        //     name: joi.string().trim().required().min(10).max(50),
-        //     email: joi.string().trim().email().required(),
-        //     specialization: joi.string().trim().required(),
-        //     password:joi.string().trim().required().min(6).max(8),
-
-        // })
+       
         const { error, value } = createInstructorSchema.validate(req.body);
         if (error) return res.status(400).json({
             message: error.details[0].message
@@ -110,7 +105,7 @@ const get_all_instructor = async (req, res) => {
 const update_instructor = async_handler(
     async (req, res) => {
         
-             const { error } = updateStudentSchema.validate(req.body);
+             const { error } = updateInstructorSchema.validate(req.body);
              if (error)
                  return res.status(400).json({
                      message: error.details[0].message

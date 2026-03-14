@@ -7,8 +7,13 @@ routers.get("/getonestudent/:id", student.gat_one_Student);
 routers.post("/loginstudent", student.login_student);
 routers.put("/updatestudent/:id",verifyTocken,student.update_student)
 routers.delete("/deletestudent/:id",verifyTocken,student.delete_student)
+
+// upload image 
+// resert password
+//
 module.exports=routers;
 //http://localhost:5000/api/updatestudent/69ac264b5f00022675a2a5bb
 /*
 example for rout shape for fine one update and delete 
 */
+

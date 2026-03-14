@@ -13,11 +13,13 @@ function verifyTocken(req, res, next) {
     }
 
 
+
 }
 /** allow only each user update his data  */
 function verifyTokenAndAuthorization(req, res, next) {
     verifyTocken(req, res, () => {
         if (req.user.id === req.params.id)
+
             next();
         else {
             return res.status(403).json({ message: "you are not allowed " })

@@ -1,5 +1,5 @@
 const Project = require("./Project_model.js")
-const student = requir("./Student_module.js")
+const student = require("./Student_module.js")
 
 const mongoose = require("mongoose")
 const Task_Schema = new mongoose.Schema({
