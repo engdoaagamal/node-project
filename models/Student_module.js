@@ -22,11 +22,17 @@ Student_schema = new mongoose.Schema({
         required: true,
         trim: true,
      
-    }
+    },
+    resetToken: String,
+    resetTokenExpire: Date,
 
-    , department: {
+    department: {
         type: String,
         required: true,
+    },
+    profileimage:{
+        type:String ,
+        required:true
     }
 }, { timestamps: true })
 const Student = mongoose.model("Student", Student_schema);

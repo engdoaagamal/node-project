@@ -2,6 +2,7 @@ const { model } = require("mongoose");
 const jwt = require("jsonwebtoken")
 
 const student = require("../models/Student_module");
+const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const joi = require("joi");
 
@@ -45,21 +46,23 @@ const async_handler = require("express-async-handler");
 // }
 
 
-
+//register
 const Create_Student =async_handler(
-    async (req, res) => {
+    async (req, res) => { 
+       // return console.log(req.file);
         const { error, value } = createStudentSchema.validate(req.body);
+        // return res.json({msg:req.body})
         if (error) return res.status(400).json({ message: error.details[0].message });
 
         const { name, email, password, universityId, department } = value;
 
         if (await student.findOne({ email }))
             return res.status(400).json({ msg: "Email already exists" });
-
+if(!req.file)return res.status(400).json({msg:"the profile image is required"})
         const newpwd = await bcrypt.hash(password, 10);
 
         const newstudent = await student.create({
-            name, email, password: newpwd, universityId, department
+            name, email, password: newpwd, universityId, department ,profileimage:req.file.path
         });
 
         const { password: pwd, ...studentData } = newstudent._doc;
@@ -232,6 +235,72 @@ const login_student =  async (req, res) => {
 
 }
 
+/////
+const forgotPassword = async_handler(async (req, res) => {
+    const user = await student.findOne({ email: req.body.email });
+
+    if (!user) {
+        return res.status(404).json({ msg: "User not found" });
+    }
+
+   
+    const token = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "10m" }
+    );
+
+    
+    user.resetToken = token;
+    user.resetTokenExpire = Date.now() + 10 * 60 * 1000;
+
+    await user.save();
+
+    const link = `http://localhost:5000/api/std/resetpassword/${token}`;
+
+    console.log("Reset Link:", link);
+
+    res.json({ msg: "Reset link sent",link :link });
+});
+
+
+const resetpwd = async_handler(async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    
+    let decoded;
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+        return res.status(400).json({ msg: "Invalid or expired token" });
+    }
+
+   
+    const user = await student.findOne({
+        _id: decoded.id,
+        resetToken: token,
+        resetTokenExpire: { $gt: Date.now() }
+    });
+
+    if (!user) {
+        return res.status(400).json({ msg: "Token not valid" });
+    }
+
+    
+    const newPassword = await bcrypt.hash(password, 10);
+
+    user.password = newPassword;
+
+   
+    user.resetToken = undefined;
+    user.resetTokenExpire = undefined;
+
+    await user.save();
+
+    res.json({ msg: "Password reset successful " });
+});
+//////
 const update_student = async_handler(
      async (req, res) => {
    if(req.user.id!==req.params.id){
@@ -284,4 +353,6 @@ module.exports = {
     login_student,
     update_student,
     delete_student,
+    resetpwd,
+    forgotPassword
 }

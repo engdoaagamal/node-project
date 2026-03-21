@@ -9,21 +9,27 @@ Instructor_schema = new mongoose.Schema({
         type: String,
         require: true,
         trim: true,
-         unique: true,
+        unique: true,
     }
     , specialization: {
         type: String,
         require: true,
-       
+
     },
 
     password: {
         type: String,
         required: true,
         trim: true,
-     
-    }
 
+    }
+    ,
+    profileimage:{
+        type:String ,
+        required:true
+    }
+    , resetToken: String,
+    resetTokenExpire: Date,
 
 }, { timestamps: true })
 const Instructor = mongoose.model("Instructor", Instructor_schema);

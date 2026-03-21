@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken")// create token
 const bcrypt = require("bcrypt")// encrebt pwd 
 const joi = require("joi");//for validation 
 const async_handler = require("express-async-handler");// for error handler
-const { createInstructorSchema ,updateInstructorSchema} = require("../validation/instructorsValidation");
+const { createInstructorSchema, updateInstructorSchema } = require("../validation/instructorsValidation");
 
 const login_instructor = async (req, res) => {
 
@@ -41,7 +41,7 @@ const login_instructor = async (req, res) => {
 }
 const register_instructor = async (req, res) => {
     try {
-       
+
         const { error, value } = createInstructorSchema.validate(req.body);
         if (error) return res.status(400).json({
             message: error.details[0].message
@@ -52,7 +52,7 @@ const register_instructor = async (req, res) => {
             return res.status(401).json({ msg: "the email/ user is exist " })
         const newpwd = await bcrypt.hash(password, 10)
         const newinstructor = await instructor.create({
-            name, email, specialization, password: newpwd
+            name, email, specialization, password: newpwd ,profileimage:req.file.path
         })
         res.status(201).json({
             msg: "createing instructor successfully",
@@ -104,31 +104,31 @@ const get_all_instructor = async (req, res) => {
 }
 const update_instructor = async_handler(
     async (req, res) => {
-        
-             const { error } = updateInstructorSchema.validate(req.body);
-             if (error)
-                 return res.status(400).json({
-                     message: error.details[0].message
-                 })
-             const updatesdinstructor = await instructor.findByIdAndUpdate(req.params.id, {
-                 $set: {
-                     name: req.body.name,
-                     email: req.body.email,
-                     specialization: req.body.specialization
-                 }
-             }, { new: true });
-     
-             if (!updatesdinstructor)
-                 return res.status(404).json({ msg: "instructor not found" })
-     
-             res.status(200).json({
-                 msg: "updating instructor success",
-                 data: updatesdinstructor
-             });
-     
-         
-     }
-     )
+
+        const { error } = updateInstructorSchema.validate(req.body);
+        if (error)
+            return res.status(400).json({
+                message: error.details[0].message
+            })
+        const updatesdinstructor = await instructor.findByIdAndUpdate(req.params.id, {
+            $set: {
+                name: req.body.name,
+                email: req.body.email,
+                specialization: req.body.specialization
+            }
+        }, { new: true });
+
+        if (!updatesdinstructor)
+            return res.status(404).json({ msg: "instructor not found" })
+
+        res.status(200).json({
+            msg: "updating instructor success",
+            data: updatesdinstructor
+        });
+
+
+    }
+)
 const delete_instructor = async_handler(
     async (req, res) => {
         const deleted_instructor = await instructor.findByIdAndDelete(req.params.id)
@@ -142,8 +142,54 @@ const delete_instructor = async_handler(
     }
 
 )
-/*
 
+const forgetpwd = async_handler(
+    async (req, res) => {
+        const user = await instructor.findOne({ email: req.body.email })
+        if (!user)
+            return res.status(404).json({
+                msg: "User not found"
+            })
+            const token = jwt.sign(
+                { id: user._id },
+                process.env.JWT_SECRET,
+                { expiresIn: "10m" }
+            );
+        
+            
+            user.resetToken = token;
+            user.resetTokenExpire = Date.now() + 10 * 60 * 1000;
+        
+        await user.save();
+        const link = `http://localhost:5000/api/instructor/resetpassword/${token}`;
+        res.json({ msg: "Reset link sent", link: link });
+    }
+)
+const resetpwd = async_handler(
+    async (req, res) => {
+        const token = req.params.token;
+        const password = req.body.password;
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(400).json({ msg: "Invalid or expired token" });
+        }
+        const user = await instructor.findOne({
+            _id: decoded.id,
+            resetToken: token,
+            resetTokenExpire: { $gt: Date.now() }
+        })
+        if (!user) { return res.status(400).json({ msg: "Token not valid" }); }
+        const newpwd = await bcrypt.hash(password, 10)
+        user.password = newpwd;
+        user.resetToken = undefined;
+        user.resetTokenExpire = undefined;
+        await user.save();
+        res.json({ msg: "Password reset successful " });
+    }
+)
+/*  
 */
 module.exports = {
     login_instructor,
@@ -152,4 +198,8 @@ module.exports = {
     get_all_instructor,
     update_instructor,
     delete_instructor,
+    forgetpwd,
+    resetpwd,
+
+
 }
