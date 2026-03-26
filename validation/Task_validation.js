@@ -15,18 +15,13 @@ const createTaskSchema = joi.object({
 )
 
 const updateTaskSchema = joi.object({
-   title: joi.string().trim()
-    ,
+    title: joi.string().trim(),
     description: joi.string(),
-
     deadline: joi.date(),
-
-    status: joi.valid("Pending", "Done"),
-
-
+    status: joi.string().valid("Pending", "Done"),
+    Project_id: joi.string(),
     Student_id: joi.string()
-
-})
+  });
 module.exports = {
     createTaskSchema,
     updateTaskSchema

@@ -80,20 +80,38 @@ const getAllTasks = async_handler(async (req, res) => {
 
 )
 //get_one_byid
+// const getoneTaskbyid = async_handler(async (req, res) => {
+//     const theTask = await Task.findById(req.params.id)
+//     if (!theTask)
+//         return res.status(404).json({
+//             msg: "no  data exist",
+
+//         })
+//     return res.status(200).json({
+//         msg: "getting the Task success",
+//         data: theTask
+//     })
+// }
+
+// )
+// new
 const getoneTaskbyid = async_handler(async (req, res) => {
+
     const theTask = await Task.findById(req.params.id)
-    if (!theTask)
-        return res.status(404).json({
-            msg: "no  data exist",
-
-        })
+      .populate("Project_id", "title")   // 👈 اسم المشروع
+      .populate("Student_id", "name");   // 👈 اسم الطالب
+  
+    if (!theTask) {
+      return res.status(404).json({
+        msg: "no data exist",
+      });
+    }
+  
     return res.status(200).json({
-        msg: "getting the Task success",
-        data: theTask
-    })
-}
-
-)
+      msg: "getting the Task success",
+      data: theTask
+    });
+  });
 // get status
 const get_status_Taskbyid = async_handler(async (req, res) => {
     const theTask = await Task.findById(req.params.id).select("status")
@@ -111,29 +129,91 @@ const get_status_Taskbyid = async_handler(async (req, res) => {
 )
 
 // update
+// const updateTask = async_handler(async (req, res) => {
+
+//     const { value, error } = updateTaskSchema.validate(req.body);
+//     if (error)
+//         return res.status(400).json({
+//             message: error.details[0].message
+//         })
+
+//     const {title, description,deadline, status,Project_id, Student_id} = value;
+//     const updatedTask = await Task.findByIdAndUpdate(
+//         req.params.id,
+//          { $set: 
+//             {title, description,deadline, status,Project_id, Student_id} 
+//         },
+//          { new: true })
+//     if (updatedTask)
+//         return res.status(200).json({
+//             msg: "updating Task success",
+//             data: updatedTask
+//         })
+// }
+
+// )
+
+
+//new 
 const updateTask = async_handler(async (req, res) => {
 
     const { value, error } = updateTaskSchema.validate(req.body);
-    if (error)
-        return res.status(400).json({
-            message: error.details[0].message
-        })
-
-    const {title, description,deadline, status,Project_id, Student_id} = value;
-    const updatedTask = await Task.findByIdAndUpdate(
-        req.params.id,
-         { $set: 
-            {title, description,deadline, status,Project_id, Student_id} 
-        },
-         { new: true })
-    if (updatedTask)
-        return res.status(200).json({
-            msg: "updating Task success",
-            data: updatedTask
-        })
-}
-
-)
+  
+    if (error) {
+      return res.status(400).json({
+        message: error.details[0].message
+      });
+    }
+  
+    const {
+      title,
+      description,
+      deadline,
+      status,
+      Project_id,
+      Student_id
+    } = value;
+  
+    // 1️⃣ هات التاسك القديم
+    const task = await Task.findById(req.params.id);
+  
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found"
+      });
+    }
+  
+    // 2️⃣ لو المشروع اتغير → نعدل الربط
+    if (Project_id && Project_id !== task.Project_id.toString()) {
+  
+      // شيل التاسك من المشروع القديم
+      await project.findByIdAndUpdate(task.Project_id, {
+        $pull: { tasks: task._id }
+      });
+  
+      // ضيفه للمشروع الجديد
+      await project.findByIdAndUpdate(Project_id, {
+        $push: { tasks: task._id }
+      });
+  
+      task.Project_id = Project_id;
+    }
+  
+    // 3️⃣ update fields (من غير ما نبعت undefined)
+    task.title = title || task.title;
+    task.description = description || task.description;
+    task.deadline = deadline || task.deadline;
+    task.status = status || task.status;
+    task.Student_id = Student_id || task.Student_id;
+  
+    // 4️⃣ save
+    await task.save();
+  
+    return res.status(200).json({
+      msg: "Task updated successfully",
+      data: task
+    });
+  });
 //delete
 const deleteTaskbyid = async_handler(async (req, res) => {
     const deletedTask = await Task.findByIdAndDelete(req.params.id)
