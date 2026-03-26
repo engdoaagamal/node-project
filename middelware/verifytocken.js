@@ -1,20 +1,21 @@
 const jwt = require("jsonwebtoken")
 function verifyTocken(req, res, next) {
-    const tocken = req.headers.tocken
-    if (!tocken) {
-        return res.status(401).json({ messaage: "no token provided " })
+    const authHeader = req.headers.authorization;
+   
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
     }
+  
+    const token = req.headers.authorization?.split(" ")[1];// Bearer TOKEN
+  
     try {
-        const decoded = jwt.verify(tocken, process.env.JWT_SECRET);
-        req.user = decoded;
-        next();
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      next();
     } catch (error) {
-        res.status(401).json({ messaage: "invalid tocken " })
+      res.status(401).json({ message: "Invalid token" });
     }
-
-
-
-}
+  }
 /** allow only each user update his data  */
 function verifyTokenAndAuthorization(req, res, next) {
     verifyTocken(req, res, () => {

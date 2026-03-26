@@ -21,6 +21,15 @@ app.get("/api",(req,res)=>{
    })
 })
 
+/////////
+const  cors =require("cors");
+
+app.use(cors(
+    {origin: "http://localhost:5173"}
+));
+
+app.use("/uploads", express.static("uploads"));
+////////////////
 app.use(express.json());
 const studentrouters=require("./routers/student_routera");
 app.use("/api",studentrouters);

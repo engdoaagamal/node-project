@@ -170,7 +170,7 @@ const gat_one_Student = async (req, res) => {
 
     try {
 
-        const onestudent = await student.findById(req.params.id).select("name email   universityId  department ");
+        const onestudent = await student.findById(req.params.id).select("name email   universityId  department profileimage ");
 
         if (!onestudent) return res.status(404).json({
             msg: "no  student with this id  exist",
@@ -211,9 +211,9 @@ const login_student =  async (req, res) => {
             return res.status(401).json({ message: "invalid password" })
         const token = jwt.sign({
             id: loginstudent._id,
-            email: loginstudent.email,
-            universityId: loginstudent.universityId,
-            name: loginstudent.name,
+            // email: loginstudent.email,
+            // universityId: loginstudent.universityId,
+            // name: loginstudent.name,
             role:"student"
         },
             process.env.JWT_SECRET,
@@ -221,7 +221,7 @@ const login_student =  async (req, res) => {
         //return console.log("the token created :",token)//jwt.decode(token)
         res.status(200).json({
             msg: "students login successfully",
-            data: loginstudent,
+            //   data: jwt.verify(token, process.env.JWT_SECRET),
             token
         })
 
@@ -316,6 +316,8 @@ const update_student = async_handler(
                 name: req.body.name,
                 email: req.body.email,
                 department: req.body.department
+                // ,
+                // profileimage:req.file.path
             }
         }, { new: true });
 

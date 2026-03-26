@@ -16,11 +16,11 @@ const login_instructor = async (req, res) => {
         const match = await bcrypt.compare(password, logininstructor.password)
         if (!match)
             return res.status(400).json({ message: "invalid password" })
-        const tocken = jwt.sign({
+        const token = jwt.sign({
             id: logininstructor._id,
-            email: logininstructor.email,
-            specialization: logininstructor.specialization,
-            name: logininstructor.name,
+            // email: logininstructor.email,
+            // specialization: logininstructor.specialization,
+            // name: logininstructor.name,
             role: "admin"
         },
             process.env.JWT_SECRET,
@@ -29,8 +29,8 @@ const login_instructor = async (req, res) => {
         //jwt.decode(tocken)
         res.status(200).json({
             msg: "instructor login successfully",
-            data: logininstructor,
-            tocken
+            // data: jwt.decode(token),
+            token
         })
     } catch (error) {
         res.status(500).json({
@@ -68,7 +68,7 @@ const register_instructor = async (req, res) => {
 }
 const get_one_instructor = async (req, res) => {
     try {
-        const oneinstructor = await instructor.findById(req.params.id).select("name email specialization")
+        const oneinstructor = await instructor.findById(req.params.id).select("name email specialization profileimage")
         if (!oneinstructor)
             return res.status(404).json({
                 msg: "no  instructor with this id  exist",
@@ -87,7 +87,7 @@ const get_one_instructor = async (req, res) => {
 }
 const get_all_instructor = async (req, res) => {
     try {
-        const allinstructor = await instructor.find().select("name email specialization")
+        const allinstructor = await instructor.find().select("name email specialization profileimage")
         if (allinstructor.length === 0)
             return res.status(404).json({ msg: "no instructor added " })
         res.status(200).json({
