@@ -1,8 +1,8 @@
-const instructor = require("../models/instructor_modules")// to access the model 
-const jwt = require("jsonwebtoken")// create token 
-const bcrypt = require("bcrypt")// encrebt pwd 
-const joi = require("joi");//for validation 
-const async_handler = require("express-async-handler");// for error handler
+const instructor = require("../models/instructor_modules")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcrypt")
+const joi = require("joi");
+const async_handler = require("express-async-handler");
 const { createInstructorSchema, updateInstructorSchema } = require("../validation/instructorsValidation");
 
 const login_instructor = async (req, res) => {
@@ -18,6 +18,7 @@ const login_instructor = async (req, res) => {
             return res.status(400).json({ message: "invalid password" })
         const token = jwt.sign({
             id: logininstructor._id,
+            // for test 
             // email: logininstructor.email,
             // specialization: logininstructor.specialization,
             // name: logininstructor.name,
@@ -26,9 +27,11 @@ const login_instructor = async (req, res) => {
             process.env.JWT_SECRET,
             { expiresIn: "5h" }
         )
+        //for test
         //jwt.decode(tocken)
         res.status(200).json({
             msg: "instructor login successfully",
+            //for test
             // data: jwt.decode(token),
             token
         })
