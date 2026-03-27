@@ -1,42 +1,21 @@
 const project = require("../models/Project_model")
 const async_handler = require("express-async-handler")
+ const Task = require("../models/Task_model");
 const { createProjectSchema, updateProjectSchema } = require("../validation/Project_validation")
 const mongoose = require("mongoose")
 // create
-// const createProject = async_handler(async (req, res) => {
-
-//     const { value, error } = createProjectSchema.validate(req.body);
-//     if (error)
-//         return res.status(400).json({
-//             message: error.details[0].message
-//         })
-
-//     const { title, description, status, approvalStatus, supervisor } = value;
-//     const newproject = await project.create({ title, description, status, approvalStatus, supervisor })
-//     if (newproject)
-//         return res.status(201).json({
-//             msg: "Project created successfully",
-//             data: newproject
-//         })
-// }
-
-// )
-//new version
-const Task = require("../models/Task_model");
-
 const createProject = async_handler(async (req, res) => {
 
     const { title, description, supervisor, students, tasks } = req.body;
 
-    // 1️⃣ create project الأول
     const newProject = await project.create({
         title,
         description,
         supervisor,
-        students // array of ids
+        students 
     });
 
-    // 2️⃣ create tasks وربطها بالـ project
+   
     if (tasks && tasks.length > 0) {
         const createdTasks = await Promise.all(
             tasks.map(task => {
@@ -46,12 +25,10 @@ const createProject = async_handler(async (req, res) => {
                     deadline: task.deadline,
                     status: task.status,
                     Project_id: newProject._id,
-                    Student_id: task.student // 👈 واحد بس
+                    Student_id: task.student 
                 });
             })
         );
-
-        // 3️⃣ خزني الـ task ids في المشروع
         newProject.tasks = createdTasks.map(t => t._id);
         await newProject.save();
     }
@@ -116,31 +93,6 @@ const get_statusProjectbyid = async_handler(async (req, res) => {
 )
 
 // update
-// const updateProject = async_handler(async (req, res) => {
-
-//     const { value, error } = updateProjectSchema.validate(req.body);
-//     if (error)
-//         return res.status(400).json({
-//             message: error.details[0].message
-//         })
-
-//     const { title, description, status, approvalStatus, supervisor } = value;
-//     const updatedproject = await project.findByIdAndUpdate(
-//         req.params.id,
-//          { $set: 
-//             { title, description, status, approvalStatus, supervisor } 
-//         },
-//          { new: true })
-//     if (updatedproject)
-//         return res.status(200).json({
-//             msg: "updating project success",
-//             data: updatedproject
-//         })
-// }
-
-// )
-
-//new
 const updateProject = async_handler(async (req, res) => {
     const { value, error } = updateProjectSchema.validate(req.body);
 
@@ -159,7 +111,7 @@ const updateProject = async_handler(async (req, res) => {
         tasks
     } = value;
 
-    // 🔥 1. update project basic data
+   
     const existingProject = await project.findById(req.params.id);
 
     if (!existingProject) {
@@ -172,13 +124,13 @@ const updateProject = async_handler(async (req, res) => {
     if (supervisor) existingProject.supervisor = supervisor;
     if (students) existingProject.students = students;
 
-    // 🔥 2. handle tasks
+   
     if (tasks) {
 
-        // ❌ delete old tasks
+       
         await Task.deleteMany({ Project_id: existingProject._id });
 
-        // ✅ create new tasks
+    
         const createdTasks = await Promise.all(
             tasks.map(t => {
                 return Task.create({
@@ -192,14 +144,14 @@ const updateProject = async_handler(async (req, res) => {
             })
         );
 
-        // ✅ save task ids
+        
         existingProject.tasks = createdTasks.map(t => t._id);
     }
 
     await existingProject.save();
 
     res.status(200).json({
-        msg: "Project updated successfully ✅",
+        msg: "Project updated successfully ",
         data: existingProject
     });
 });
