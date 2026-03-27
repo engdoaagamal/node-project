@@ -37,20 +37,7 @@ function verifyadmin(req, res, next) {
         }
     })
 }
-/*
-req.user.role هو الدور اللي موجود في الـ JWT token (مثلاً "student", "instructor", "admin").
 
-الكود يتحقق هل هذا الدور موجود ضمن الأدوار المسموح بها (roles.includes(req.user.role)).
-
-إذا لا → يرفض الوصول (403).
-
-إذا نعم → يستمر (next())
-// مسموح فقط للطلاب
-routers.put("/student-action/:id", verifyTocken, authorizeRoles("student"), student.studentAction);
-
-// مسموح للمدرسين و admins
-routers.put("/instructor-action/:id", verifyTocken, authorizeRoles("instructor", "admin"), instructor.action);
-*/
 function authorizeRoles(...roles) {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
