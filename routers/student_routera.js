@@ -22,12 +22,8 @@ routers.delete("/deletestudent/:id",verifyadmin,student.delete_student)
 
 routers.post("/std/forgotpassword", student.forgotPassword);
 routers.post("/std/resetpassword/:token", student.resetpwd);
-// upload image ok
-// resert password ok
-//
+
 module.exports=routers;
 //http://localhost:5000/api/updatestudent/69ac264b5f00022675a2a5bb
-/*
-example for rout shape for fine one update and delete 
-*/
+
 
