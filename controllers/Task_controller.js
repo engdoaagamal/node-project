@@ -12,26 +12,6 @@ const async_handler = require("express-async-handler")
 const { createTaskSchema, updateTaskSchema } = require("../validation/Task_validation")
 const mongoose = require("mongoose")
 // create
-// const createTask = async_handler(async (req, res) => {
-
-//     const { value, error } = createTaskSchema.validate(req.body);
-//     if (error)
-//         return res.status(400).json({
-//             message: error.details[0].message
-//         })
-
-//     const { title, description,deadline, status,Project_id, Student_id } = value;
-//     const newTask = await Task.create({  title, description,deadline, status,Project_id, Student_id })
-//     if (newTask)
-//     //const project task =await project.findone({_id:project_id}).tasks.push(newtask)
-//         return res.status(201).json({
-//             msg: "Task created successfully",
-//             data: newTask
-//         })
-// }
-
-// )
-
 const createTask = async_handler(async (req, res) => {
 
     const { value, error } = createTaskSchema.validate(req.body);
@@ -195,7 +175,7 @@ const getall_by_project_id = async_handler(async (req, res) => {
 
 
 //getall_by_std_id
-const getall_by_std_id = async_handler(async (req, res) => {
+//const getall_by_std_id = async_handler(async (req, res) => {
   // console.log("in router ")
     // const theTasks = await Task.find({Student_id: mongoose.Types.ObjectId(req.params.id)})
     //  if (theTasks.length===0)
@@ -207,9 +187,9 @@ const getall_by_std_id = async_handler(async (req, res) => {
     //     msg: "getting the Tasks success",
     //     data: theTasks
     // })
-}
+//}
 
-)
+//)
 
 // const getall_by_std_id = async_handler(async (req, res) => {
 //     let studentId;
@@ -235,7 +215,7 @@ const getall_by_std_id = async_handler(async (req, res) => {
 /*------------------------------------------------------------------------------*/
 
 module.exports={
-    getall_by_std_id,
+  //  getall_by_std_id,
     getall_by_project_id,
     deleteTaskbyid,
     updateTask,
